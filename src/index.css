@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-green: #00c805;
+  --color-brand-red: #ff5000;
+  --color-brand-bg: #0a0a0a;
+  
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  --animate-marquee: marquee 20s linear infinite;
+}
+
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-white antialiased;
+  }
+}
+
+.glass-card {
+  @apply bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl;
+}
+

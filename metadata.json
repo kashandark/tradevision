@@ -1,0 +1,8 @@
+{
+  "name": "TradeVision AI",
+  "description": "AI-powered trading assistant for technical analysis and market predictions based on chart patterns.",
+  "requestFramePermissions": [
+    "camera",
+    "display-capture"
+  ]
+}
