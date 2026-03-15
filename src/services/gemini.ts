@@ -10,6 +10,8 @@ export interface AnalysisResult {
     support: string;
     resistance: string;
   };
+  entryZone?: string;
+  targetZone?: string;
   indicators: string;
   suggestedDuration?: string;
   timestamp?: string;
@@ -31,34 +33,38 @@ export async function analyzeChart(imageUri: string, localTime: string, isLive: 
       {
         parts: [
           {
-            text: `You are a professional Technical Analyst and Trading Bot. 
-            Analyze this trading chart screenshot (likely from a platform like Pocket Option).
+            text: `You are a Senior Quantitative Technical Analyst and Precision Trading Bot. 
+            Analyze this trading chart screenshot with surgical precision.
             
             Current System Time: ${localTime}
-            Analysis Mode: ${isLive ? 'LIVE REAL-TIME (Priority: Immediate Scalping)' : 'STATIC SCREENSHOT (Priority: Detailed Technical Analysis)'}
+            Analysis Mode: ${isLive ? 'LIVE REAL-TIME (Priority: Scalping & Immediate Momentum)' : 'STATIC SCREENSHOT (Priority: Structural & Trend Analysis)'}
             
-            Tasks:
-            1. Identify the current time displayed on the chart (look at the clock or X-axis).
-            2. Identify the current trend (Bullish, Bearish, Sideways).
-            3. Locate immediate Support and Resistance levels.
-            4. Look for candlestick patterns (e.g., Pin Bar, Engulfing, Doji).
-            5. Analyze visible indicators (RSI, MACD, Bollinger Bands) if present.
-            6. Suggest a clear action: BUY (Call), SELL (Put), or WAIT (Neutral).
-            7. Provide specific entry and exit price suggestions.
-            8. Suggest an optimal TRADE DURATION or EXPIRATION (e.g., 1 min, 5 min, End of Hour) based on the time and volatility.
-            9. Provide a confidence score (0-100%).
+            Technical Requirements:
+            1. CANDLESTICK PRECISION: Identify exact patterns (e.g., Three White Soldiers, Morning Star, Bearish Harami, Exhaustion Gaps).
+            2. TREND CONTEXT: Determine if the trend is accelerating, slowing down (exhaustion), or consolidating.
+            3. KEY LEVELS: Identify the MOST RECENT and RELEVANT Support/Resistance. Do not use old levels.
+            4. INDICATOR SYNERGY: Look for RSI overbought/oversold conditions, MACD crossovers, or Bollinger Band squeezes/rejections.
+            5. TIME-PRICE ALIGNMENT: Check the chart clock. If a candle is about to close (e.g., 59th second), factor that into the "suggestedDuration".
+            
+            Output Requirements:
+            - "direction": Must be BUY, SELL, or WAIT.
+            - "confidence": Be conservative. Only 90%+ if multiple indicators align.
+            - "entryZone": The exact price or range to enter (e.g., "1.08450 - 1.08460").
+            - "targetZone": The expected price level for the trade to be successful.
+            - "suggestedDuration": Specific expiration (e.g., "M1 (60s)", "M5 (300s)", "End of 15m Candle").
             
             IMPORTANT FOR LIVE MODE:
-            - Focus on the LAST COMPLETED CANDLE and the CURRENT FORMING CANDLE.
-            - If the price is at a major level, prioritize a REVERSAL or BREAKOUT signal.
-            - Be extremely precise with the "suggestedDuration" (e.g., "M1" for 1-minute expiration).
+            - Analyze the MICRO-TREND.
+            - If price is hovering at a level, look for "rejection wicks" or "breakout volume".
             
-            Return the analysis in strict JSON format with the following structure:
+            Return the analysis in strict JSON format:
             {
               "direction": "BUY" | "SELL" | "WAIT",
               "confidence": number,
               "reasoning": string[],
               "keyLevels": { "support": "string", "resistance": "string" },
+              "entryZone": "string",
+              "targetZone": "string",
               "indicators": "string summary",
               "suggestedDuration": "string"
             }

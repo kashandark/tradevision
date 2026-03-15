@@ -474,6 +474,19 @@ export default function App() {
                         </div>
                       </div>
 
+                      {(result.entryZone || result.targetZone) && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-brand-green/5 rounded-xl border border-brand-green/10">
+                            <p className="text-[10px] text-brand-green uppercase font-bold mb-1">Entry Zone</p>
+                            <p className="font-mono text-sm font-bold">{result.entryZone || 'N/A'}</p>
+                          </div>
+                          <div className="p-4 bg-brand-red/5 rounded-xl border border-brand-red/10">
+                            <p className="text-[10px] text-brand-red uppercase font-bold mb-1">Target Zone</p>
+                            <p className="font-mono text-sm font-bold">{result.targetZone || 'N/A'}</p>
+                          </div>
+                        </div>
+                      )}
+
                       {result.suggestedDuration && (
                         <div className="p-4 bg-brand-green/10 rounded-xl border border-brand-green/20">
                           <p className="text-[10px] text-brand-green uppercase font-bold mb-1 flex items-center gap-1">
