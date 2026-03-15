@@ -104,14 +104,14 @@ export default function App() {
       setIsLive(true);
       setError(null);
       setIsQuotaExceeded(false);
-      setCountdown(15);
+      setCountdown(30);
 
       // Start analysis loop
       analysisIntervalRef.current = setInterval(async () => {
         setCountdown(prev => {
           if (prev <= 1) {
             triggerManualScan();
-            return 15;
+            return 30;
           }
           return prev - 1;
         });
@@ -139,12 +139,17 @@ export default function App() {
         const data = await analyzeChart(frame, localTime, true);
         setResult(data);
         setIsQuotaExceeded(false);
-        if (isLive) setCountdown(15); // Reset countdown on manual scan
+        if (isLive) setCountdown(30); // Reset countdown on manual scan
       } catch (err: any) {
         console.error("Analysis error:", err);
         if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
           setIsQuotaExceeded(true);
-          setError("API Quota Exceeded. Please wait a moment.");
+          setError("API Quota Exceeded. Auto-retry in 60s...");
+          // Auto-recover after 60 seconds
+          setTimeout(() => {
+            setIsQuotaExceeded(false);
+            setError(null);
+          }, 60000);
         } else {
           setError("Analysis failed. Please try again.");
         }
@@ -479,6 +484,12 @@ export default function App() {
                           )}>
                             {result.direction}
                           </h3>
+                          {result.pattern && (
+                            <p className="text-xs font-bold text-white/60 mt-1 flex items-center gap-1">
+                              <BarChart3 className="w-3 h-3 text-brand-green" />
+                              {result.pattern}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -595,7 +606,7 @@ export default function App() {
                       <RefreshCw className={cn("w-4 h-4 text-brand-green", isAnalyzing && "animate-spin")} />
                     </button>
                     <span className="text-[10px] font-mono text-white/40">
-                      {isQuotaExceeded ? "Paused" : `Next scan in ${countdown}s`}
+                      {isQuotaExceeded ? "Cooldown" : `Next scan in ${countdown}s`}
                     </span>
                   </div>
                 </div>
@@ -604,7 +615,7 @@ export default function App() {
                     <motion.div 
                       className="h-full bg-brand-green"
                       initial={{ width: "100%" }}
-                      animate={{ width: `${(countdown / 15) * 100}%` }}
+                      animate={{ width: `${(countdown / 30) * 100}%` }}
                       transition={{ duration: 1, ease: "linear" }}
                     />
                   </div>
@@ -629,6 +640,14 @@ export default function App() {
                   <AlertTriangle className="w-5 h-5 shrink-0" />
                   <span className="font-bold">{error}</span>
                 </div>
+                {error.includes("Quota Exceeded") && (
+                  <button 
+                    onClick={() => { setIsQuotaExceeded(false); setError(null); triggerManualScan(); }}
+                    className="ml-8 mt-2 w-fit px-3 py-1 bg-brand-red/20 hover:bg-brand-red/30 rounded-lg text-xs font-bold transition-colors"
+                  >
+                    Retry Now
+                  </button>
+                )}
                 {error.includes("permissions policy") && (
                   <p className="text-xs opacity-80 pl-8">
                     Screen sharing is often blocked in embedded windows. Try opening this app in a <strong>New Tab</strong> using the button in the top right of the editor.

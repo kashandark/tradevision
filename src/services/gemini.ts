@@ -5,6 +5,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 export interface AnalysisResult {
   direction: "BUY" | "SELL" | "WAIT";
   confidence: number;
+  pattern?: string;
   reasoning: string[];
   keyLevels: {
     support: string;
@@ -33,25 +34,28 @@ export async function analyzeChart(imageUri: string, localTime: string, isLive: 
       {
         parts: [
           {
-            text: `You are a Senior Quantitative Analyst. Analyze this chart with surgical precision.
+            text: `You are a Senior Quantitative Analyst and Technical Chart Specialist. Analyze this chart with surgical precision and temporal awareness.
             
             Current Time: ${localTime}
-            Mode: ${isLive ? 'LIVE SCALPING' : 'STRUCTURAL ANALYSIS'}
+            Mode: ${isLive ? 'LIVE SCALPING (High Sensitivity)' : 'STRUCTURAL ANALYSIS (High Reliability)'}
             
             Technical Requirements:
-            1. CANDLESTICKS: Identify exact patterns (e.g., Pin Bar, Engulfing, Morning Star).
-            2. TREND: Confirm if trend is accelerating or exhausting.
-            3. LEVELS: Identify immediate Support/Resistance.
-            4. INDICATORS: Synergy check (RSI, MACD, BB).
+            1. PATTERN RECOGNITION: Identify specific chart patterns (e.g., Head & Shoulders, Double Bottom, Rising Wedge, Flag, Pennant). Be explicit about the pattern name.
+            2. CANDLESTICKS: Identify exact high-probability patterns (e.g., Pin Bar, Engulfing, Morning Star, Doji at key levels).
+            3. TREND ALIGNMENT: Confirm if the trend is accelerating, exhausting, or reversing relative to the current time and session.
+            4. LEVELS: Identify immediate and secondary Support/Resistance zones.
+            5. INDICATORS: Synergy check (RSI divergence, MACD crossovers, Bollinger Band squeezes).
+            6. SUSTAINABILITY: Estimate how long this signal will remain valid based on the current market momentum.
             
             Output (JSON):
             - "direction": BUY, SELL, or WAIT.
-            - "confidence": 0-100 (conservative).
-            - "entryZone": Exact price range.
-            - "targetZone": Expected price level.
-            - "indicators": Summary of technical indicators.
-            - "suggestedDuration": Expiration (e.g., M1, M5).
-            - "reasoning": Array of concise bullet points (strings).
+            - "confidence": 0-100 (be conservative, 85+ only for high-probability setups).
+            - "pattern": Name of the primary chart pattern identified.
+            - "entryZone": Exact price range for entry.
+            - "targetZone": Expected price level for profit taking.
+            - "indicators": Summary of technical indicators and their alignment.
+            - "suggestedDuration": How long the trade is expected to sustain (e.g., "Next 5-15 mins", "Next 1-4 hours", "End of Session").
+            - "reasoning": Array of concise bullet points explaining the logic.
             - "keyLevels": { "support": "string", "resistance": "string" }
             
             Return ONLY strict JSON.
