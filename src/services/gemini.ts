@@ -1,6 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const getApiKey = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key || key === "undefined") return "";
+  return key;
+};
+
+const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
 export interface AnalysisResult {
   direction: "BUY" | "SELL" | "WAIT";
@@ -19,6 +25,10 @@ export interface AnalysisResult {
 }
 
 export async function analyzeChart(imageUri: string, localTime: string, isLive: boolean = false): Promise<AnalysisResult> {
+  if (!getApiKey()) {
+    throw new Error("Gemini API Key is missing. Please configure it in the Secrets menu or .env file.");
+  }
+
   if (!imageUri || !imageUri.includes(",")) {
     throw new Error("Invalid image data provided for analysis.");
   }
