@@ -76,7 +76,7 @@ export default function App() {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
     try {
-      return canvas.toDataURL('image/jpeg', 0.7);
+      return canvas.toDataURL('image/jpeg', 0.6); // Slightly lower quality for faster transmission
     } catch (e) {
       console.error("Canvas capture failed", e);
       return null;
@@ -85,41 +85,33 @@ export default function App() {
 
   const startLiveStream = async () => {
     try {
+      // Check if display sharing is supported and allowed
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        throw new Error("Screen sharing is not supported in this browser.");
+      }
+
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: { cursor: "always" } as any,
         audio: false
+      }).catch(err => {
+        if (err.name === 'NotAllowedError' || err.message.includes('permissions policy')) {
+          throw new Error("Screen sharing is blocked by browser policy. Please open this app in a NEW TAB to enable Live Stream.");
+        }
+        throw err;
       });
       
       setStream(displayStream);
       setIsLive(true);
       setError(null);
       setIsQuotaExceeded(false);
-      setCountdown(30);
+      setCountdown(15);
 
       // Start analysis loop
       analysisIntervalRef.current = setInterval(async () => {
         setCountdown(prev => {
           if (prev <= 1) {
-            // Trigger capture when countdown hits 0
-            const frame = captureFrame();
-            if (frame && !isAnalyzing && !isQuotaExceeded) {
-              setIsAnalyzing(true);
-              const localTime = new Date().toLocaleTimeString();
-              analyzeChart(frame, localTime, true)
-                .then(data => {
-                  setResult(data);
-                  setIsQuotaExceeded(false);
-                })
-                .catch(err => {
-                  console.error("Live analysis error:", err);
-                  if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
-                    setIsQuotaExceeded(true);
-                    setError("API Quota Exceeded. Live updates paused.");
-                  }
-                })
-                .finally(() => setIsAnalyzing(false));
-            }
-            return 30;
+            triggerManualScan();
+            return 15;
           }
           return prev - 1;
         });
@@ -132,6 +124,33 @@ export default function App() {
     } catch (err) {
       setError("Failed to start screen sharing. Please grant permissions.");
       console.error(err);
+    }
+  };
+
+  const triggerManualScan = async () => {
+    if (isAnalyzing || isQuotaExceeded) return;
+    
+    const frame = captureFrame();
+    if (frame) {
+      setIsAnalyzing(true);
+      setError(null);
+      try {
+        const localTime = new Date().toLocaleTimeString();
+        const data = await analyzeChart(frame, localTime, true);
+        setResult(data);
+        setIsQuotaExceeded(false);
+        if (isLive) setCountdown(15); // Reset countdown on manual scan
+      } catch (err: any) {
+        console.error("Analysis error:", err);
+        if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
+          setIsQuotaExceeded(true);
+          setError("API Quota Exceeded. Please wait a moment.");
+        } else {
+          setError("Analysis failed. Please try again.");
+        }
+      } finally {
+        setIsAnalyzing(false);
+      }
     }
   };
 
@@ -466,11 +485,11 @@ export default function App() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                           <p className="text-[10px] text-white/40 uppercase font-bold mb-1">Resistance</p>
-                          <p className="font-mono text-sm">{result.keyLevels.resistance}</p>
+                          <p className="font-mono text-sm">{result.keyLevels?.resistance || 'N/A'}</p>
                         </div>
                         <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                           <p className="text-[10px] text-white/40 uppercase font-bold mb-1">Support</p>
-                          <p className="font-mono text-sm">{result.keyLevels.support}</p>
+                          <p className="font-mono text-sm">{result.keyLevels?.support || 'N/A'}</p>
                         </div>
                       </div>
 
@@ -508,12 +527,14 @@ export default function App() {
                           <Info className="w-3 h-3" /> Analysis Reasoning
                         </p>
                         <ul className="space-y-2">
-                          {result.reasoning.map((reason, i) => (
+                          {Array.isArray(result.reasoning) ? result.reasoning.map((reason, i) => (
                             <li key={i} className="text-sm text-white/70 flex gap-2">
                               <span className="text-brand-green">•</span>
                               {reason}
                             </li>
-                          ))}
+                          )) : (
+                            <li className="text-sm text-white/70 italic">Analyzing market conditions...</li>
+                          )}
                         </ul>
                       </div>
                     </div>
@@ -525,7 +546,7 @@ export default function App() {
                       <BarChart3 className="w-4 h-4 text-white/40" /> Indicator Summary
                     </h4>
                     <p className="text-sm text-white/60 leading-relaxed italic">
-                      "{result.indicators}"
+                      "{result.indicators || 'No specific indicator data available for this timeframe.'}"
                     </p>
                   </div>
                 </motion.div>
@@ -564,16 +585,26 @@ export default function App() {
                       {isQuotaExceeded ? "Quota Exceeded" : "Live Engine Active"}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-white/40">
-                    {isQuotaExceeded ? "Paused" : `Next scan in ${countdown}s`}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={triggerManualScan}
+                      disabled={isAnalyzing || isQuotaExceeded}
+                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+                      title="Scan Now"
+                    >
+                      <RefreshCw className={cn("w-4 h-4 text-brand-green", isAnalyzing && "animate-spin")} />
+                    </button>
+                    <span className="text-[10px] font-mono text-white/40">
+                      {isQuotaExceeded ? "Paused" : `Next scan in ${countdown}s`}
+                    </span>
+                  </div>
                 </div>
                 {!isQuotaExceeded ? (
                   <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
                     <motion.div 
                       className="h-full bg-brand-green"
                       initial={{ width: "100%" }}
-                      animate={{ width: `${(countdown / 30) * 100}%` }}
+                      animate={{ width: `${(countdown / 15) * 100}%` }}
                       transition={{ duration: 1, ease: "linear" }}
                     />
                   </div>

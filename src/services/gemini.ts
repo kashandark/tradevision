@@ -33,41 +33,28 @@ export async function analyzeChart(imageUri: string, localTime: string, isLive: 
       {
         parts: [
           {
-            text: `You are a Senior Quantitative Technical Analyst and Precision Trading Bot. 
-            Analyze this trading chart screenshot with surgical precision.
+            text: `You are a Senior Quantitative Analyst. Analyze this chart with surgical precision.
             
-            Current System Time: ${localTime}
-            Analysis Mode: ${isLive ? 'LIVE REAL-TIME (Priority: Scalping & Immediate Momentum)' : 'STATIC SCREENSHOT (Priority: Structural & Trend Analysis)'}
+            Current Time: ${localTime}
+            Mode: ${isLive ? 'LIVE SCALPING' : 'STRUCTURAL ANALYSIS'}
             
             Technical Requirements:
-            1. CANDLESTICK PRECISION: Identify exact patterns (e.g., Three White Soldiers, Morning Star, Bearish Harami, Exhaustion Gaps).
-            2. TREND CONTEXT: Determine if the trend is accelerating, slowing down (exhaustion), or consolidating.
-            3. KEY LEVELS: Identify the MOST RECENT and RELEVANT Support/Resistance. Do not use old levels.
-            4. INDICATOR SYNERGY: Look for RSI overbought/oversold conditions, MACD crossovers, or Bollinger Band squeezes/rejections.
-            5. TIME-PRICE ALIGNMENT: Check the chart clock. If a candle is about to close (e.g., 59th second), factor that into the "suggestedDuration".
+            1. CANDLESTICKS: Identify exact patterns (e.g., Pin Bar, Engulfing, Morning Star).
+            2. TREND: Confirm if trend is accelerating or exhausting.
+            3. LEVELS: Identify immediate Support/Resistance.
+            4. INDICATORS: Synergy check (RSI, MACD, BB).
             
-            Output Requirements:
-            - "direction": Must be BUY, SELL, or WAIT.
-            - "confidence": Be conservative. Only 90%+ if multiple indicators align.
-            - "entryZone": The exact price or range to enter (e.g., "1.08450 - 1.08460").
-            - "targetZone": The expected price level for the trade to be successful.
-            - "suggestedDuration": Specific expiration (e.g., "M1 (60s)", "M5 (300s)", "End of 15m Candle").
+            Output (JSON):
+            - "direction": BUY, SELL, or WAIT.
+            - "confidence": 0-100 (conservative).
+            - "entryZone": Exact price range.
+            - "targetZone": Expected price level.
+            - "indicators": Summary of technical indicators.
+            - "suggestedDuration": Expiration (e.g., M1, M5).
+            - "reasoning": Array of concise bullet points (strings).
+            - "keyLevels": { "support": "string", "resistance": "string" }
             
-            IMPORTANT FOR LIVE MODE:
-            - Analyze the MICRO-TREND.
-            - If price is hovering at a level, look for "rejection wicks" or "breakout volume".
-            
-            Return the analysis in strict JSON format:
-            {
-              "direction": "BUY" | "SELL" | "WAIT",
-              "confidence": number,
-              "reasoning": string[],
-              "keyLevels": { "support": "string", "resistance": "string" },
-              "entryZone": "string",
-              "targetZone": "string",
-              "indicators": "string summary",
-              "suggestedDuration": "string"
-            }
+            Return ONLY strict JSON.
             
             Disclaimer: Always state that this is for educational purposes and not financial advice.`
           },
