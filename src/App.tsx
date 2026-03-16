@@ -104,14 +104,19 @@ export default function App() {
       setIsLive(true);
       setError(null);
       setIsQuotaExceeded(false);
-      setCountdown(30);
+      
+      // Align with M1 Cycle (60s). Scan every 20s (00, 20, 40)
+      const initialSeconds = new Date().getSeconds();
+      setCountdown(20 - (initialSeconds % 20));
 
-      // Start analysis loop
       analysisIntervalRef.current = setInterval(async () => {
+        const now = new Date();
+        const seconds = now.getSeconds();
+        
         setCountdown(prev => {
           if (prev <= 1) {
             triggerManualScan();
-            return 30;
+            return 20;
           }
           return prev - 1;
         });
@@ -139,7 +144,7 @@ export default function App() {
         const data = await analyzeChart(frame, localTime, true);
         setResult(data);
         setIsQuotaExceeded(false);
-        if (isLive) setCountdown(30); // Reset countdown on manual scan
+        if (isLive) setCountdown(20); // Reset countdown on manual scan
       } catch (err: any) {
         console.error("Analysis error:", err);
         if (err.message?.includes("429") || err.message?.includes("RESOURCE_EXHAUSTED")) {
@@ -216,7 +221,7 @@ export default function App() {
             <div className="w-8 h-8 bg-brand-green rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-black fill-current" />
             </div>
-            <span className="text-xl font-bold tracking-tight">TradeVision <span className="text-brand-green">AI</span></span>
+            <span className="text-xl font-bold tracking-tight">TradeVision <span className="text-brand-green">M1</span></span>
           </div>
           
           {/* Market Ticker */}
@@ -426,8 +431,8 @@ export default function App() {
                     <BarChart3 className="w-6 h-6 text-brand-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                   </div>
                   <div className="text-center">
-                    <p className="font-bold text-lg">Scanning Patterns...</p>
-                    <p className="text-sm text-white/40">Gemini is analyzing candlestick structures</p>
+                    <p className="font-bold text-lg">Scanning M1 Patterns...</p>
+                    <p className="text-sm text-white/40">Gemini is analyzing 1-minute candlestick structures</p>
                   </div>
                 </motion.div>
               ) : result ? (
@@ -472,9 +477,9 @@ export default function App() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-sm text-white/40 font-medium uppercase tracking-wider">Suggested Action</p>
+                              <p className="text-sm text-white/40 font-medium uppercase tracking-wider">M1 Scalping Signal</p>
                             {isLive && (
-                              <span className="text-[8px] font-black bg-brand-green/20 text-brand-green px-1.5 py-0.5 rounded border border-brand-green/30 uppercase tracking-tighter">Live</span>
+                               <span className="text-[8px] font-black bg-brand-green/20 text-brand-green px-1.5 py-0.5 rounded border border-brand-green/30 uppercase tracking-tighter">Live M1</span>
                             )}
                           </div>
                           <h3 className={cn(
@@ -504,18 +509,28 @@ export default function App() {
                         </div>
                       </div>
 
-                      {(result.entryZone || result.targetZone) && (
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="p-4 bg-brand-green/5 rounded-xl border border-brand-green/10">
-                            <p className="text-[10px] text-brand-green uppercase font-bold mb-1">Entry Zone</p>
-                            <p className="font-mono text-sm font-bold">{result.entryZone || 'N/A'}</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-brand-green/10 rounded-xl border border-brand-green/20 relative group">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] text-brand-green uppercase font-black tracking-widest">Entry Zone</p>
+                            <Info className="w-3 h-3 text-brand-green/40 cursor-help" />
                           </div>
-                          <div className="p-4 bg-brand-red/5 rounded-xl border border-brand-red/10">
-                            <p className="text-[10px] text-brand-red uppercase font-bold mb-1">Target Zone</p>
-                            <p className="font-mono text-sm font-bold">{result.targetZone || 'N/A'}</p>
+                          <p className="font-mono text-xl font-black text-brand-green">{result.entryZone || 'N/A'}</p>
+                          <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-black border border-white/10 rounded-lg text-[10px] text-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
+                            <span className="font-bold text-brand-green">Entry Zone:</span> The exact price range where you should open your trade for maximum efficiency.
                           </div>
                         </div>
-                      )}
+                        <div className="p-4 bg-brand-red/10 rounded-xl border border-brand-red/20 relative group">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] text-brand-red uppercase font-black tracking-widest">Target Zone</p>
+                            <Info className="w-3 h-3 text-brand-red/40 cursor-help" />
+                          </div>
+                          <p className="font-mono text-xl font-black text-brand-red">{result.targetZone || 'N/A'}</p>
+                          <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black border border-white/10 rounded-lg text-[10px] text-white/60 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-2xl">
+                            <span className="font-bold text-brand-red">Target Zone:</span> The price level where you should close your trade to lock in profits.
+                          </div>
+                        </div>
+                      </div>
 
                       {result.suggestedDuration && (
                         <div className="p-4 bg-brand-green/10 rounded-xl border border-brand-green/20">

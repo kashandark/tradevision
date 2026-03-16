@@ -44,33 +44,38 @@ export async function analyzeChart(imageUri: string, localTime: string, isLive: 
       {
         parts: [
           {
-            text: `You are a Senior Quantitative Analyst and Technical Chart Specialist. Analyze this chart with surgical precision and temporal awareness.
+            text: `You are an Elite M1 Scalping Bot and Quantitative Analyst. Your goal is to provide ultra-accurate, real-time BUY/SELL signals for the 1-minute (M1) timeframe.
             
             Current Time: ${localTime}
-            Mode: ${isLive ? 'LIVE SCALPING (High Sensitivity)' : 'STRUCTURAL ANALYSIS (High Reliability)'}
+            Mode: ${isLive ? 'REAL-TIME M1 SCALPING' : 'STRUCTURAL ANALYSIS'}
             
-            Technical Requirements:
-            1. PATTERN RECOGNITION: Identify specific chart patterns (e.g., Head & Shoulders, Double Bottom, Rising Wedge, Flag, Pennant). Be explicit about the pattern name.
-            2. CANDLESTICKS: Identify exact high-probability patterns (e.g., Pin Bar, Engulfing, Morning Star, Doji at key levels).
-            3. TREND ALIGNMENT: Confirm if the trend is accelerating, exhausting, or reversing relative to the current time and session.
-            4. LEVELS: Identify immediate and secondary Support/Resistance zones.
-            5. INDICATORS: Synergy check (RSI divergence, MACD crossovers, Bollinger Band squeezes).
-            6. SUSTAINABILITY: Estimate how long this signal will remain valid based on the current market momentum.
+            M1 Scalping Strategy Rules:
+            1. MICRO-TREND: Identify if the M1 trend is bullish, bearish, or ranging.
+            2. CANDLESTICK SIGNALS: Look for high-probability M1 reversal or continuation candles (e.g., Pin Bars, Engulfing, Marubozu).
+            3. MOMENTUM: Use the current price action to determine if a move is likely to sustain for the next 60-120 seconds.
+            4. PRECISION LEVELS: Identify the exact micro-support and micro-resistance levels visible on the M1 chart.
+            5. SIGNAL ACCURACY: Only suggest BUY or SELL if the confidence is above 90%. Otherwise, suggest WAIT.
             
             Output (JSON):
-            - "direction": BUY, SELL, or WAIT.
-            - "confidence": 0-100 (be conservative, 85+ only for high-probability setups).
-            - "pattern": Name of the primary chart pattern identified.
-            - "entryZone": Exact price range for entry.
-            - "targetZone": Expected price level for profit taking.
-            - "indicators": Summary of technical indicators and their alignment.
-            - "suggestedDuration": How long the trade is expected to sustain (e.g., "Next 5-15 mins", "Next 1-4 hours", "End of Session").
-            - "reasoning": Array of concise bullet points explaining the logic.
+            - "direction": BUY, SELL, or WAIT. (CRITICAL: This is an M1-SPECIFIC signal. Only suggest BUY/SELL if a high-probability 1-minute scalping opportunity exists).
+            - "confidence": 0-100 (90+ for high-probability M1 setups).
+            - "pattern": The specific M1 pattern identified (e.g., "M1 Bullish Engulfing", "M1 Breakout").
+            - "entryZone": The EXACT price for immediate M1 entry (e.g., "1.0842").
+            - "targetZone": The EXACT price target for a 1-2 minute trade (e.g., "1.0855").
+            - "indicators": Brief summary of M1 indicator alignment.
+            - "suggestedDuration": Strictly "1-2 Minutes" for M1 scalping.
+            - "reasoning": 3 concise bullet points explaining the M1 momentum.
             - "keyLevels": { "support": "string", "resistance": "string" }
+
+            CRITICAL M1 SCALPING RULES:
+            1. Focus ONLY on the 1-minute timeframe dynamics.
+            2. Do not flip signals rapidly unless a clear M1 structural shift is visible.
+            3. If the current M1 candle is indecisive, suggest WAIT.
+            4. Ensure Entry/Target prices are precise for M1 micro-moves.
             
             Return ONLY strict JSON.
             
-            Disclaimer: Always state that this is for educational purposes and not financial advice.`
+            Disclaimer: Educational purposes only. Not financial advice.`
           },
           {
             inlineData: {
